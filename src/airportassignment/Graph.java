@@ -34,6 +34,8 @@ public interface Graph<D,W> {
   interface Edge<D,W> {
     W getWeight();
     Vertex<D,W> getHeadVertex();
+
+        public Object getDestination();
     }
   
   }
