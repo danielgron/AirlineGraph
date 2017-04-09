@@ -6,6 +6,7 @@
 package graphimpl;
 
 import airportassignment.Graph;
+import airportassignment.Graphs;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,10 +31,16 @@ public class LinkedGraph<Data, Weight> implements Graph<Data, Weight> {
         // TODO code application logic here
 
         LinkedGraph<Person, Integer> g = new LinkedGraph();
-        g.addVertex(new Person("Bob"));
-        g.addVertex(new Person("John"));
+        Person p = new Person("Bob");
+        Person p2 = new Person("John");
+        g.addVertex(p);
+        g.addVertex(p2);
+        
 
-        g.addEdge(0, g.vertexOf(new Person("Bob")), g.vertexOf(new Person("John")), true);
+        g.addEdge(0, g.vertexOf(p), g.vertexOf(p2), true);
+        g.vertexOf(p);
+        g.vertexOf(p2);
+        Graphs.isReachableDepthFirst(g, g.vertexOf(p), g.vertexOf(p2));
     }
 
     @Override
