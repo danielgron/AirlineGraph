@@ -6,6 +6,7 @@
 package graphimpl;
 
 import airportassignment.Graph;
+import airportassignment.Graphs;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,10 +31,16 @@ public class LinkedGraph<Data, Weight> implements Graph<Data, Weight> {
         // TODO code application logic here
 
         LinkedGraph<Person, Integer> g = new LinkedGraph();
-        g.addVertex(new Person("Bob"));
-        g.addVertex(new Person("John"));
+        Person p = new Person("Bob");
+        Person p2 = new Person("John");
+        g.addVertex(p);
+        g.addVertex(p2);
+        
 
-        g.addEdge(0, g.vertexOf(new Person("Bob")), g.vertexOf(new Person("John")), true);
+        g.addEdge(0, g.vertexOf(p), g.vertexOf(p2), true);
+        g.vertexOf(p);
+        g.vertexOf(p2);
+        Graphs.isReachableDepthFirst(g, g.vertexOf(p), g.vertexOf(p2));
     }
 
     @Override
@@ -49,12 +56,9 @@ public class LinkedGraph<Data, Weight> implements Graph<Data, Weight> {
     public void addEdge(Weight weight, Vertex<Data, Weight> tail, Vertex<Data, Weight> head, boolean directed) {
 
         LinkedEdge edge = new LinkedEdge(tail, head, weight);
-//        System.out.println(head);
         edges = new LinkedElement(edge, edges);
-        if(tail != null || tail != null){
-            if (tail.getClass()== LinkedVertex.class)((LinkedVertex)tail).addEdge(edge);
-            System.out.println("SUCCESS");
-        }
+        if (tail.getClass()== LinkedVertex.class)((LinkedVertex)tail).addEdge(edge);
+
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -88,16 +92,11 @@ public class LinkedGraph<Data, Weight> implements Graph<Data, Weight> {
     public Vertex<Data, Weight> vertexOf(Data data) {
         LinkedElement<LinkedVertex> traverse = vertices;
         while (traverse != null) {
-            System.out.println(".." + traverse.getData().getData());
-            System.out.println(".." + data);
-            System.out.println("DONE");
-            if (traverse.getData().getData() == data){
-                System.out.println("return" + data);
+            if (traverse.getData().getData() == data) {
                 return traverse.getData();
             }
             traverse = traverse.rest;
         }
-            System.out.println("STOP");
         return null;
     }
 
