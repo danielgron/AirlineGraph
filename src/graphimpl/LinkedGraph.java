@@ -109,7 +109,7 @@ public class LinkedGraph<Data, Weight> implements Graph<Data, Weight> {
         return adjacentEdges;
     }
 
-    private class LinkedVertex implements Vertex<Data, Weight> {
+    public class LinkedVertex implements Vertex<Data, Weight> {
 
         //LinkedElement<Data> data;
         Data d;

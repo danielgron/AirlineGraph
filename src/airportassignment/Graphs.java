@@ -23,7 +23,8 @@ public class Graphs {
             while (marked.contains(current = stack.pop()));
             if (current.equals(target)){
                 System.out.println("Found target! Number of evaluations: "+i);
-                while(!stack.isEmpty())System.out.println(stack.pop());
+                while(!stack.isEmpty())
+//                    System.out.println(stack.pop());
                 return true;
             }
             marked.add(current);

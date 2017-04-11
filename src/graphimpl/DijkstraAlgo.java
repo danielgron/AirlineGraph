@@ -1,9 +1,8 @@
-
 package graphimpl;
 
-import airportassignment.Graph;
-import airportassignment.Graph.Edge;
-import airportassignment.Graph.Vertex;
+import airportimport.Airport;
+import airportimport.Path;
+import airportimport.Route;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,118 +16,121 @@ import java.util.Set;
  *
  * @author Cherry Rose Semeña
  */
-public class DijkstraAlgo<D,W>{
-    
-        private final List<Vertex<D,W>> vertices;
-        private final List<Edge<D,W>> edges;
-        private Set<Vertex<D,W>> visited;
-        private Set<Vertex<D,W>> unvisited;
-        private Map<Vertex<D,W>, Vertex<D,W>> predecessors;
-        private Map<Vertex<D,W>, Integer> distance;
+public class DijkstraAlgo {
 
-        public DijkstraAlgo(Graph graph) {
-                // create a copy of the array so that we can operate on this array
-                this.vertices = new ArrayList<Vertex<D,W>>(graph.getVertices());
-                this.edges = new ArrayList<Edge<D,W>>(graph.getEdges());
+    private final List<Airport> vertices;
+    private final List<Route> edges;
+    private Set<Airport> visited;
+    private Set<Airport> unvisited;
+    private Map<Airport, Airport> predecessors;
+    private Map<Airport, Path> distance;
+
+    public DijkstraAlgo(List<Airport> vertices, List<Route> edges) {
+        // create a copy of the array so that we can operate on this array
+        this.vertices = vertices;
+        this.edges = edges;
+    }
+
+    public void execute(Airport source) {
+        visited = new HashSet<Airport>();
+        unvisited = new HashSet<Airport>();
+        distance = new HashMap<Airport, Path>();
+        predecessors = new HashMap<Airport, Airport>();
+        distance.put(source, null);
+        unvisited.add(source);
+        while (unvisited.size() > 0) {
+            System.out.println(unvisited.size());
+            System.out.println("DONE EXECUTE" + visited.toString());
+            Airport a = getMinimum(unvisited);
+            visited.add(a);
+            unvisited.remove(a);
+            findMinimalDistances(a);
         }
 
-        public void execute(Vertex source) {
-                visited = new HashSet<Vertex<D,W>>();
-                unvisited = new HashSet<Vertex<D,W>>();
-                distance = new HashMap<Vertex<D,W>, Integer>();
-                predecessors = new HashMap<Vertex<D,W>, Vertex<D,W>>();
-                distance.put(source, 0);
-                unvisited.add(source);
-                while (unvisited.size() > 0) {
-                        Vertex<D,W> v = getMinimum(unvisited);
-                        visited.add(v);
-                        unvisited.remove(v);
-                        findMinimalDistances(v);
-               }
+        System.out.println(unvisited.size());
+    }
+
+    private void findMinimalDistances(Airport a) {
+        List<Airport> adjacentNodes = getNeighbors(a);
+        for (Airport target : adjacentNodes) {
+            Path p = getDistance(a, target);
+            if (getShortestDistance(target) > getShortestDistance(a)
+                    + p.getDistance()) {
+                distance.put(target, new Path(getShortestDistance(a)
+                        + p.getDistance(), 0.0));
+                predecessors.put(target, a);
+                unvisited.add(target);
+            }
         }
 
-        private void findMinimalDistances(Vertex<D,W> v) {
-                List<Vertex<D,W>> adjacentNodes = getNeighbors(v);
-                for (Vertex<D,W> target : adjacentNodes) {
-                        if (getShortestDistance(target) > getShortestDistance(v)
-                                        + getDistance(v, target)) {
-                                distance.put(target, getShortestDistance(v)
-                                                + getDistance(v, target));
-                                predecessors.put(target, v);
-                                unvisited.add(target);
-                        }
-                }
+    }
 
+    private Path getDistance(Airport v, Airport target) {
+        for (Route edge : edges) {
+            if (edge.getSource().equals(v)
+                    && edge.getDestination().equals(target)) {
+                return edge.getPath();
+            }
         }
+        throw new RuntimeException("Should not happen");
+    }
 
-        private int getDistance(Vertex<D,W> v, Vertex<D,W> target) {
-                for (Edge edge : edges) {
-                        if (edge.getHeadVertex().equals(v)
-                                        && edge.getDestination().equals(target)) {
-                                return (int)edge.getWeight();
-                        }
-                }
-                throw new RuntimeException("Should not happen");
+    private List<Airport> getNeighbors(Airport v) {
+        List<Airport> neighbors = new ArrayList<Airport>();
+        for (Route edge : edges) {
+            if (edge.getSource().equals(v)
+                    && !isSettled(edge.getDestination())) {
+                neighbors.add((Airport) edge.getDestination());
+            }
         }
+        return neighbors;
+    }
 
-        private List<Vertex<D,W>> getNeighbors(Vertex<D,W> v) {
-                List<Vertex<D,W>> neighbors = new ArrayList<Vertex<D,W>>();
-                for (Edge edge : edges) {
-                        if (edge.getHeadVertex().equals(v)
-                                        && !isSettled((Vertex<D, W>) edge.getDestination())) {
-                                neighbors.add((Vertex<D, W>) edge.getDestination());
-                        }
-                }
-                return neighbors;
+    private Airport getMinimum(Set<Airport> vertices) {
+        Airport minimum = null;
+        for (Airport vertex : vertices) {
+            if (minimum == null) {
+                minimum = vertex;
+            } else if (getShortestDistance(vertex) < getShortestDistance(minimum)) {
+                minimum = vertex;
+            }
         }
+        return minimum;
+    }
 
-        private Vertex<D,W> getMinimum(Set<Vertex<D,W>> vertices) {
-                Vertex<D,W> minimum = null;
-                for (Vertex<D,W> vertex : vertices) {
-                        if (minimum == null) {
-                                minimum = vertex;
-                        } else {
-                                if (getShortestDistance(vertex) < getShortestDistance(minimum)) {
-                                        minimum = vertex;
-                                }
-                        }
-                }
-                return minimum;
+    private boolean isSettled(Airport vertex) {
+        return visited.contains(vertex);
+    }
+
+    private Double getShortestDistance(Airport destination) {
+        Path d = distance.get(destination);
+        Double dist = d.getDistance();
+        if (dist == null) {
+            return Double.MAX_VALUE;
+        } else {
+            return dist;
         }
+    }
 
-        private boolean isSettled(Vertex<D,W> vertex) {
-                return visited.contains(vertex);
-        }
-
-        private int getShortestDistance(Vertex<D,W> destination) {
-                Integer d = distance.get(destination);
-                if (d == null) {
-                        return Integer.MAX_VALUE;
-                } else {
-                        return d;
-                }
-        }
-
-         /*
+    /*
          * This method returns the path from the source to the selected target and
          * NULL if no path exists
-         */
-        public LinkedList<Vertex<D,W>> getPath(Vertex<D,W> target) {
-                LinkedList<Vertex<D,W>> path = new LinkedList<Vertex<D,W>>();
-                Vertex<D,W> step = target;
-                // check if a path exists
-                if (predecessors.get(step) == null) {
-                        return null;
-                }
-                path.add(step);
-                while (predecessors.get(step) != null) {
-                        step = predecessors.get(step);
-                        path.add(step);
-                }
-                // Put it into the correct order
-                Collections.reverse(path);
-                return path;
+     */
+    public LinkedList<Airport> getPath(Airport target) {
+        LinkedList<Airport> path = new LinkedList<Airport>();
+        Airport step = target;
+        // check if a path exists
+        if (predecessors.get(step) == null) {
+            return null;
         }
-
+        path.add(step);
+        while (predecessors.get(step) != null) {
+            step = predecessors.get(step);
+            path.add(step);
+        }
+        // Put it into the correct order
+        Collections.reverse(path);
+        return path;
+    }
 
 }
